@@ -72,6 +72,7 @@ public class Server {
                     thread.sendHttpResponse(split[1]);
                     thread.serve(split[1]);
                 }
+                thread.start();
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(500);
@@ -119,7 +120,7 @@ public class Server {
     private class GoBackNThread extends Thread {
         private ArrayList<Packet> queue = new ArrayList<>();
         private Date[] timestamp = new Date[WINDOW_SIZE];
-        private boolean[] window = new boolean[WINDOW_SIZE];
+        private Packet[] window = new Packet[WINDOW_SIZE];
         private boolean hasCompletedTransmission = false;
         private boolean isRunning = true;
         private InetSocketAddress clientAddress;
@@ -130,16 +131,20 @@ public class Server {
         }
 
         void enqueue(byte[] data) {
-            short sequence = (short) ((queue.get(queue.size() - 1).sequence + 1) % SEQUENCE_MODULO);
+            int nextSequence = queue.size() > 0 ? (queue.get(queue.size() - 1).sequence + 1) : 0;
+            short sequence = (short) (nextSequence % SEQUENCE_MODULO);
             queue.add(new Packet(sequence, data));
         }
 
         public void run() {
+            System.out.println(String.format("Creating client thread for %s:%s", clientAddress.getAddress(), clientAddress.getPort()));
             while (isRunning) {
                 if (queue.size() > 0) {
                     for (Packet packet : queue) {
-                        send(packet); // DO NOT DEQUEUE PACKET UNTIL ACK RECEIVED
-                        window[packet.sequence] = false;
+                        if (!packet.inTransit) {
+                            send(packet); // DO NOT DEQUEUE PACKET UNTIL ACK RECEIVED
+                            window[packet.sequence] = packet;
+                        }
                     }
                 }
                 //Once completed sending and receiving all ACKs and NAKs
@@ -156,6 +161,7 @@ public class Server {
                 sendPacket = new DatagramPacket(packet.compiled, packet.compiled.length, clientAddress);
                 System.out.println("--Sending HTTP response: \n" + new String(packet.buffer));
                 serverSocket.send(sendPacket);
+                packet.inTransit = true;
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(500);
@@ -209,6 +215,8 @@ public class Server {
         byte[] buffer;
         long created;
         long sent;
+        boolean inTransit = false;
+        boolean isCompleted = false;
 
         Packet(short sequence, byte[] data) {
             this.created = new Date().getTime();
