@@ -8,7 +8,7 @@ import java.util.Map;
  * based on command line arguments. Please read the included README for all options
  *
  * @author GROUP 10 - Joseph Schultz (jjs0021), Cameron Schaerfl (crs0051), Erich Wu (ejw0013)
- * @version 3-21-2017
+ * @version 3-30-2017
  */
 
 public class Main {
@@ -16,7 +16,10 @@ public class Main {
 
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 10036;
-    private static final double DEFAULT_GREMLIN = 0.0;
+    private static final double DEFAULT_GREMLIN_COR = 0.0;
+    private static final double DEFAULT_GREMLIN_DRO = 0.0;
+    private static final double DEFAULT_GREMLIN_DEL = 0.0;
+    private static final int DEFAULT_GREMLIN_DEL_T = 0;
     private static final String DEFAULT_REQUEST_FILE = "TestFile.html";
     private static final String DEFAULT_OUT_FILE = "reassembled.html";
 
@@ -48,7 +51,10 @@ public class Main {
     public static Client initClient(Map<String, List<String>> params) {
         int port = DEFAULT_PORT;
         String host = DEFAULT_HOST;
-        double gremlin = DEFAULT_GREMLIN;
+        double gremlin_cor = DEFAULT_GREMLIN_COR;
+        double gremlin_dro = DEFAULT_GREMLIN_DRO;
+        double gremlin_del = DEFAULT_GREMLIN_DEL;
+        int gremlin_del_t = DEFAULT_GREMLIN_DEL_T;
         String requestFile = DEFAULT_REQUEST_FILE;
         String outFile = DEFAULT_OUT_FILE;
         if (params.containsKey("port")) {
@@ -57,8 +63,17 @@ public class Main {
         if (params.containsKey("host")) {
             host = params.get("host").get(0);
         }
-        if (params.containsKey("gremlin")) {
-            gremlin = Double.parseDouble(params.get("gremlin").get(0));
+        if (params.containsKey("gremlin_cor")) {
+            gremlin_cor = Double.parseDouble(params.get("gremlin_cor").get(0));
+        }
+        if (params.containsKey("gremlin_dro")) {
+            gremlin_dro = Double.parseDouble(params.get("gremlin_dro").get(0));
+        }
+        if (params.containsKey("gremlin_del")) {
+            gremlin_del = Double.parseDouble(params.get("gremlin_del").get(0));
+        }
+        if (params.containsKey("gremlin_del_t")) {
+            gremlin_del_t = Integer.parseInt(params.get("gremlin_del_t").get(0));
         }
         if (params.containsKey("rfile")) {
             requestFile = params.get("rfile").get(0);
@@ -66,10 +81,13 @@ public class Main {
         if (params.containsKey("ofile")) {
             outFile = params.get("ofile").get(0);
         }
-        System.out.println("Program running in CLIENT mode with port: "
-                + port + " and host: " + host + " and gremlin chance: " + gremlin);
 
-        return new Client(port, host, gremlin, requestFile, outFile);
+        System.out.println("Program running in CLIENT mode with port: "
+                + port + "\nand host: " + host + "\nand gremlin corruption chance: " + gremlin_cor +
+                "\nand gremlin drop chance: " + gremlin_dro + "\nand gremlin delay chance: " + gremlin_del +
+                "\nand gremlin delay time: " + gremlin_del_t);
+
+        return new Client(port, host, gremlin_cor, gremlin_dro, gremlin_del, gremlin_del_t, requestFile, outFile);
     }
 
     /**
