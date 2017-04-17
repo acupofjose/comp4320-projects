@@ -8,7 +8,7 @@ import java.util.Map;
  * based on command line arguments. Please read the included README for all options
  *
  * @author GROUP 10 - Joseph Schultz (jjs0021), Cameron Schaerfl (crs0051), Erich Wu (ejw0013)
- * @version 3-30-2017
+ * @version 4-17-2017
  */
 
 public class Main {
@@ -82,11 +82,8 @@ public class Main {
             outFile = params.get("ofile").get(0);
         }
 
-        System.out.println("Program running in CLIENT mode with port: "
-                + port + "\nand host: " + host + "\nand gremlin corruption chance: " + gremlin_cor +
-                "\nand gremlin drop chance: " + gremlin_dro + "\nand gremlin delay chance: " + gremlin_del +
-                "\nand gremlin delay time: " + gremlin_del_t);
-
+        System.out.println(String.format("Program running in CLIENT mode with port: %s\nhost: %s\ngremlin corruption chance: %s\ngremlin drop chance: %s\ngremlin delay chance: %s\ngremlin delay time: %s",
+                port, host, gremlin_cor, gremlin_dro, gremlin_del, gremlin_del_t));
         return new Client(port, host, gremlin_cor, gremlin_dro, gremlin_del, gremlin_del_t, requestFile, outFile);
     }
 
@@ -105,9 +102,7 @@ public class Main {
         if (params.containsKey("host")) {
             host = params.get("host").get(0);
         }
-        System.out.println("Program running in SERVER mode with port: "
-                + port + " and host: " + host);
-
+        System.out.println(String.format("Program running in SERVER mode with port: %s and host: %s", port, host));
         return new Server(port, host);
     }
 
